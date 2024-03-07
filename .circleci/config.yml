@@ -1,33 +1,96 @@
 # This config was automatically generated from your source code
 # Stacks detected: deps:node:.
 version: 2.1
-orbs:
-  node: circleci/node@5
-jobs:
-  test-node:
+jobs: #we give the circleci jobs names. They're user defined. They don't have a 'technical' meaning, that is, to say me naming test-node something else doesn't change the executor or the other commands nested into it
+  run-tests:
+    docker:
+      - image: circleci/node:latest
     # Install node dependencies and run tests
-    executor: node/default
+    #executor: node/default
     steps:
       - checkout
-      - node/install-packages:
-          cache-path: ~/project/node_modules
-          override-ci-command: npm install
-      - run:
+      - restore_cache:
+          keys:
+            - dependency-cache-{{ checksum "package.json "}}
+            - dependency-cache-
+      #- node/install-packages:
+      #cache-path: ~/project/node_modules
+      #override-ci-command: npm install
+      - run: #run is used for invoking all command line programs, taking a map of configuraiton values or when called in short-form
+          # a string that will be used as both the command and name. Run commands are executed using non-login shells by default
+          # so you must explicitly source any dot files as part of the command. The run step replaces the "deploy" stop as it's deprecated
+          name: Install Dependencies
+          command: . build/install_dependencies.sh
+      - run: #each run declaration represents a new shell. You can do multi line commands where each line is run in the same shell
           name: Run tests
           command: npm test --passWithNoTests
-  deploy:
-    # This is an example deploy job, not actually used by the workflow
-    docker:
-      - image: cimg/base:stable
-    steps:
-      # Replace this with steps to deploy to users
       - run:
-          name: deploy
-          command: '#e.g. ./deploy.sh'
-workflows:
-  build-and-test:
+          name: Login to Org
+          command: . build/login_to_sandbox.sh
+      - run:
+          namne: Run Apex Tests
+          command: . build/run_apex_tests.sh
+      - store_test_results:
+          path: test-results
+  code-review: #setting up another job for code reviews. Each job is in its own docker container, they don't know anything about what job1 did, installed etc. they only know about what is relevant to itself
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout # used to check out source code to the configured path (defaults to working_directory) path defaults to ".", your current directory for the project
+      #checkout automatically adds the required authenticity keys for interacting with GitHub and Bitbucket over SSH
+      - restore_cache: #restore our cache if we have one
+          keys: #everything within keys is part of one cache, example: the two lines below are part of one cache.
+            - dependency-cache-{{ checksum "package.json "}}
+            - dependency-cache- #because this second key is less specific than the first, there will more than likely be differences between
+            #the current state and most recently generated cache. When a dependency tool runs, it would discover outdated dependencies and
+            #update them. This is referred to as a partial cache restore.
+            #Note to invalidate your cache manually, change the name of the keys above.
+      - run:
+          name: Install Dependencies
+          command: . build/install_dependencies.sh #install our dependencies. this is the same SF script that installs our cli globally
+      - save_cache: #A cache stores a hierarchy of files under a key. Use a cache to store data that makes your job faster, but, in the case
+          #of a cache miss (cache isn't in memory) or zero cache restore, the job still runs successfully. Example: you might cache npm package directories (aka node_modules)
+          #The first time your job is run, it downloads all dependencies, caches them, and (provided the cache is valid) the cache is used to speed
+          #up your job next time it is run.
+          key: dependency-cache-{{ checksum "package.json" }} #save our cache
+          paths:
+            - node_modules
+      - run:
+          name: SFDX Scanner Analysis
+          command: . build/run_sfdx_scanner.sh
+      - store_artifacts:
+          path: sfdxScannerAnalysis.csv
+  deploy-code: #code deployment job
+    docker:
+      - image: circleci/node:latest
+    steps:
+      - checkout #checkout project source code into the job's working_directory
+      - restore_cache:
+          keys:
+            - dependency-cache-{{ checksum "package.json "}}
+            - dependency-cache-
+      - run:
+          name: Install Dependencies
+          command: . build/install_dependencies.sh
+      - save_cache:
+          key: dependency-cache-{{ checksum "package.json" }} #save our cache
+          paths:
+            - node_modules
+      - run:
+          name: Login to Org
+          command: . build/login_to_sandbox.sh
+      - run:
+          namne: Deploy to Org
+          command: . build/deploy_code.sh
+workflows: #workflows determine which jobs run when and how.
+  version: 2
+  validate:
     jobs:
-      - test-node
-    # - deploy:
-    #     requires:
-    #       - test-node
+      - run-tests
+      - code-review:
+        requires:
+          - run-tests #I don't want code review to run unless run-tests is successful
+      - deploy-code:
+          requires:
+            - code-review #I don't want the deploy code job to run unless the code-review finishes succesfully
+

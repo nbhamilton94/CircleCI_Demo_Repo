@@ -38,6 +38,10 @@ $RECYCLE.BIN/
 
 # Local environment variables
 .env
+server.crt
+server.csr
+server.key
+server.key.txt
 
 # Python Salesforce Functions
 **/__pycache__/
