@@ -13,7 +13,7 @@ jobs: #we give the circleci jobs names. They're user defined. They don't have a 
           keys:
             - dependency-cache-{{ checksum "package.json "}}
             - dependency-cache-
-      #- node/install-packages:
+      #node/install-packages:
       #cache-path: ~/project/node_modules
       #override-ci-command: npm install
       - run: #run is used for invoking all command line programs, taking a map of configuraiton values or when called in short-form
@@ -40,7 +40,7 @@ jobs: #we give the circleci jobs names. They're user defined. They don't have a 
       #checkout automatically adds the required authenticity keys for interacting with GitHub and Bitbucket over SSH
       - restore_cache: #restore our cache if we have one
           keys: #everything within keys is part of one cache, example: the two lines below are part of one cache.
-            - dependency-cache-{{ checksum "package.json "}}
+            - dependency-cache-{{ checksum "package.json"}}
             - dependency-cache- #because this second key is less specific than the first, there will more than likely be differences between
             #the current state and most recently generated cache. When a dependency tool runs, it would discover outdated dependencies and
             #update them. This is referred to as a partial cache restore.
@@ -67,7 +67,7 @@ jobs: #we give the circleci jobs names. They're user defined. They don't have a 
       - checkout #checkout project source code into the job's working_directory
       - restore_cache:
           keys:
-            - dependency-cache-{{ checksum "package.json "}}
+            - dependency-cache-{{ checksum "package.json"}}
             - dependency-cache-
       - run:
           name: Install Dependencies
