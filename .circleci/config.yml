@@ -82,15 +82,14 @@ jobs: #we give the circleci jobs names. They're user defined. They don't have a 
       - run:
           namne: Deploy to Org
           command: . build/deploy_code.sh
-workflows: #workflows determine which jobs run when and how.
+workflows:
   version: 2
   validate:
     jobs:
       - run-tests
       - code-review:
-        requires:
-          - run-tests #I don't want code review to run unless run-tests is successful
+          requires:
+            - run-tests
       - deploy-code:
           requires:
-            - code-review #I don't want the deploy code job to run unless the code-review finishes succesfully
-
+            - code-review
