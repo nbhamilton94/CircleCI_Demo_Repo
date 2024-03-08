@@ -36,7 +36,7 @@ jobs: #we give the circleci jobs names. They're user defined. They don't have a 
           path: test-results
   code-review: #setting up another job for code reviews. Each job is in its own docker container, they don't know anything about what job1 did, installed etc. they only know about what is relevant to itself
     docker:
-      - image: cimg/node:20
+      - image: circleci/node:latest
     steps:
       - checkout # used to check out source code to the configured path (defaults to working_directory) path defaults to ".", your current directory for the project
       #checkout automatically adds the required authenticity keys for interacting with GitHub and Bitbucket over SSH
