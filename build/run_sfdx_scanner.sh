@@ -2,7 +2,9 @@ echo "Installing JDK"
 sudo apt update
 sudo apt-get install openjdk-11-jdk
 echo "Install SFDX Scanner"
-echo -e 'y/n' | sudo npm i -g @salesforce/
+echo -e 'y/n' | sudo npm i -g @salesforce/sfdx-scanner/
+echo "i am here:"
+pwd
 cd /node_modules/\@salesforce/sfdx-scanner/
 sf plugins link
 # echo -e 'y/n' | sfdx plugins:install @salesforce/sfdx-scanner
