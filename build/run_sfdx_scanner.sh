@@ -1,7 +1,7 @@
 echo "Installing JDK"
 sudo apt update
 sudo apt-get install openjdk-11-jdk
-yarn cache clean
+sudo npm install
 
 echo "Install SFDX Scanner"
 echo -e 'y/n' | sfdx plugins:install @salesforce/sfdx-scanner
