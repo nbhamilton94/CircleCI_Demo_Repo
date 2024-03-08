@@ -4,7 +4,8 @@ sudo apt-get install openjdk-11-jdk
 sudo npm install
 
 echo "Install SFDX Scanner"
-echo -e 'y/n' | sfdx plugins:install @salesforce/sfdx-scanner
+echo -e 'y/n' | npm install @salesforce/sfdx-scanner
+# echo -e 'y/n' | sfdx plugins:install @salesforce/sfdx-scanner
 
 echo "Running SFDX Scanner"
 #running the scanner on the default folder in the repository (force-app/main/default) place the results in sfdxScannerAnalysis.csv
