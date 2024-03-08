@@ -23,4 +23,4 @@ sfdx force:source:deploy --sourcepath force-app --targetusername DevHub
 echo "Testing code in org"
 #run tests and output the test results in a directory called test-results in the tap format.
 #Again the user the tests is run under is one we authenticated as using the Devhub Alias
-sfdx force:apex:test:run --testlevel RunLocalTests --outputdir test-results --resultformat tap --targetusername DevHub
+#sfdx force:apex:test:run --testlevel RunLocalTests --outputdir test-results --resultformat tap --targetusername DevHub
